@@ -2,8 +2,11 @@ import { WorkerIdentify } from './worker_define';
 import { WorkerTransmit, RegisterPack } from './worker_ds';
 import { HasReturn, HasTransmit } from './worker_desc';
 import { getPort, addWorkerPort } from './worker_mgr';
-import { MessagePort } from 'worker_threads';
 import { getWorkerInfo } from './worker_desc';
+
+/**
+ * 默认动作触发器
+ */
 export class BasicPatch {
   @HasReturn(false)
   @HasTransmit()

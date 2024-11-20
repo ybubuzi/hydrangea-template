@@ -66,7 +66,7 @@ export class WorkerTransmit<T = never> {
 }
 
 /**
- * 进程动作定义
+ * 进程动作描述定义
  */
 export class ActionMeta {
   /** 该动作标志 */

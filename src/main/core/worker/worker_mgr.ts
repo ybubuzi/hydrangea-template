@@ -2,10 +2,14 @@ import { WorkerIdentify, BasicAction } from './worker_define';
 import { WorkerTransmit, ActionMeta, WorkerMetaInfo } from './worker_ds';
 import { Worker, MessagePort, MessageChannel, TransferListItem, isMainThread } from 'worker_threads';
 import { getWorkerInfo } from './worker_desc';
+
+/* ============================ BEIGN 内部结构区 =================================== */
 interface ActionFunction {
   (transmit: WorkerTransmit): ActionMeta & { result: Promise<any> };
 }
+/* ============================ END 内部结构区 =================================== */
 
+/* ============================ BEIGN 内部变量区 =================================== */
 /* 记录工作进程与信道的映射关系 */
 const WorkerPortMapper = new Map<WorkerIdentify | string, MessagePort>();
 /* 记录该线程内所有标识符与动作的映射关系 */
@@ -14,6 +18,8 @@ const WorkerActionMapper = new Map<string, ActionFunction>();
 const WorkerReqquestMapper = new Map<string, PromisePair>();
 /** 记录线程注册信息 */
 const WorkerTargetMateMapper = new WeakMap<MessagePort, WorkerMetaInfo>();
+/* =========================== END 内部变量区 =================================== */
+
 /**
  * 获取指定进程的信道信息
  * @param identify
@@ -30,11 +36,12 @@ export function getPort(identify: WorkerIdentify | string) {
  * @param identify
  * @param port
  */
-export function addWorkerPort(identify: WorkerIdentify, port: MessagePort,info?:WorkerMetaInfo) {
+export function addWorkerPort(identify: WorkerIdentify, port: MessagePort, info?: WorkerMetaInfo) {
   WorkerPortMapper.set(identify, port);
-  if(info){
-    WorkerTargetMateMapper.set(port,info)
+  if (info) {
+    WorkerTargetMateMapper.set(port, info);
   }
+
   // 为新建立的信道增加事件派发
   port.addListener('message', async (transmit: unknown) => {
     equalType<WorkerTransmit>(transmit, 'object');
@@ -152,7 +159,6 @@ async function createWorkerLink(identify: WorkerIdentify): Promise<MessagePort> 
  * @param identify
  */
 export async function getWorkerInstance(identify: WorkerIdentify | string) {
-  // 通过进程标识符获取信道连接
   const workerPort = await createWorkerLink(identify as WorkerIdentify);
   const proxy = new Proxy(
     {},
