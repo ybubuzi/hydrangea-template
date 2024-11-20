@@ -1,0 +1,16 @@
+{
+  "extends": "./config/typescript/tsconfig.basic.json",
+  "include": [
+    "electron.vite.config.*",
+    "src/main/**/*",
+    "src/preload/**/*",
+    "src/shared/**/*",
+    "config/vite-config/**/*",
+    "build-dev/auto-main-import.d.ts"
+  ],
+  "compilerOptions": {
+    "types": [
+      "electron-vite/node"
+    ],
+  }
+}

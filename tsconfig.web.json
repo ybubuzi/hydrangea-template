@@ -1,0 +1,19 @@
+{
+  "extends": "./config/typescript/tsconfig.basic.json",
+  "include": [
+    "src/renderer/src/env.d.ts",
+    "src/renderer/src/**/*",
+    "src/renderer/src/**/*.vue",
+    "src/preload/*.d.ts",
+    "src/shared/**/*",
+    "build-dev/auto-renderer-import.d.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": []
+  }
+}
