@@ -1,23 +1,29 @@
 import { WorkerBasicWrapper } from '@/main/core/worker/worker_basic';
 import { StartWorker } from '@/main/core/worker/worker_starter';
-import { HasReturn } from '@/main/core/worker/worker_desc';
-import { getWorkerInstance } from '@/main/core/worker/worker_mgr';
-import { Thread } from '@/main/core/worker/worker_desc';
+import { Thread, InjectWorker } from '@/main/core/worker/worker_desc';
 
 @Thread()
 export class TestBWroker extends WorkerBasicWrapper {
+  
+  @InjectWorker('worker-1')
+  private aoo;
+
   constructor() {
     super();
-    console.log('B 被创建了')
-    setTimeout(async () => {
-      const p = (await getWorkerInstance('worker-1')) as any;
-      console.log(process.identity,await p.look());
-    }, 1000);
+    this.lazyRun()
   }
- 
+
   sayHi(name: string) {
-    console.log('hello, i am ', process.identity);
-    return `hello, i'm kuku`;
+    const msg = `hello, i'm ${process.identity}`;
+    console.log(`[${process.identity}][sayHi]:`, `hello ${name},`);
+    console.log(`[${process.identity}][sayHi]:`, `I will send you a message of [${msg}]`);
+    return msg;
+  }
+  lazyRun() {
+    setTimeout(async () => {
+      const msg = await this.aoo.look();
+      console.log(`[${process.identity}][lazyRun]:`, msg);
+    },1000);
   }
 }
 StartWorker(TestBWroker);

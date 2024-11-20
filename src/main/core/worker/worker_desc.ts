@@ -2,10 +2,10 @@
  * 用于提供标记线程信息相关的工具库
  */
 import { WorkerTransmit, ActionMeta } from './worker_ds';
-import { addTiggerAction } from './worker_mgr';
+import { addTiggerAction, getWorkerInstance } from './worker_mgr';
 import { isMainThread } from 'worker_threads';
 
-type ClassConstructor<T = any> = (abstract new (...args: any[]) => T) | (new (...args: any[]) => T);
+type ClassConstructor<T = any> = new (...args: any[]) => T;
 
 /**
  * 函数装饰器参数结构体
@@ -24,13 +24,24 @@ class MetaNode {
   decorator = new FunctionDecoratorParam();
 }
 /**
+ * 依赖注入描述
+ */
+class DepMeta {
+  memberName: string = '';
+  dependName: string = '';
+}
+/**
  * 记录对象所有的注册函数,最终注册完成将返回给调用方
  * Key为实例对象
  */
 const API_META_MAPPER = new Map<Object, Map<string, MetaNode>>();
 
-/** 记录本地业务类缓存 */
+/** 记录本地业务类缓存,key为业务类构造函数,value对应业务实例 */
 const WORKER_INSTANCE_MAPPER = new Map<ClassConstructor, Object>();
+
+/* 记录本地线程依赖注入的信息 */
+const LOCAL_DEPENDENCY_INJECT = new Map<ClassConstructor, Array<DepMeta>>();
+
 /**
  * 新增或更新暴露函数的信息
  * 建立函数被调用链接
@@ -157,6 +168,7 @@ export function Thread() {
         }
         // todo: 可选择检测WORKER_INSTANCE_MAPPER是否存在映射来限制类创建单例
         Promise.resolve(this._register());
+        Promise.resolve(this._inject());
       }
       /** 获取当前类实例所有函数并注册 */
       private _register() {
@@ -180,6 +192,23 @@ export function Thread() {
           );
         }
       }
+
+      private _inject() {
+        setTimeout(async () => {
+          const dependList = LOCAL_DEPENDENCY_INJECT.get(Module);
+          if (!dependList) {
+            return;
+          }
+          const instance = WORKER_INSTANCE_MAPPER.get(Module);
+          if (!instance) {
+            throw new HydrangeaError(ErrorCode.BAD_CALL_FUNCTION, 'Instance not found');
+          }
+          for (const depend of dependList) {
+            const worker = await getWorkerInstance(depend.dependName);
+            Reflect.set(this, depend.memberName, worker);
+          }
+        }, 300);
+      }
     };
     return SubClass as T;
   };
@@ -191,4 +220,18 @@ export function ThreadMethod() {}
 /**
  * 标记该属性将才有注入方式导入其他线程的引用
  */
-export function InjectWorker() {}
+export function InjectWorker(name: string): PropertyDecorator {
+  return function <T extends { constructor: ClassConstructor }>(Module: T, prop: any) {
+    const TargetConstructor = Module.constructor;
+    notNil(TargetConstructor, 'TargetConstructor is not found');
+    let dependList = LOCAL_DEPENDENCY_INJECT.get(TargetConstructor);
+    if (!dependList) {
+      dependList = new Array();
+      LOCAL_DEPENDENCY_INJECT.set(TargetConstructor, dependList);
+    }
+    dependList.push({
+      dependName: name,
+      memberName: prop
+    });
+  } as PropertyDecorator;
+}
