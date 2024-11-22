@@ -43,6 +43,9 @@ const WORKER_INSTANCE_MAPPER = new Map<ClassConstructor, Object>();
 /* 记录本地线程依赖注入的信息 */
 const LOCAL_DEPENDENCY_INJECT = new Map<ClassConstructor, Array<DepMeta>>();
 
+/** 记录本地所有需要依赖注入的类注册方法，将在线程激活前调用 */
+export const LOCAL_INJECT_QUEUE = new Array<Function>()
+
 /**
  * 新增或更新暴露函数的信息
  * 建立函数被调用链接
@@ -169,7 +172,7 @@ export function Thread() {
         }
         // todo: 可选择检测WORKER_INSTANCE_MAPPER是否存在映射来限制类创建单例
         Promise.resolve(this._register());
-        Promise.resolve(this._inject());
+        LOCAL_INJECT_QUEUE.push(this._inject.bind(this))
       }
       /** 获取当前类实例所有函数并注册 */
       private _register() {

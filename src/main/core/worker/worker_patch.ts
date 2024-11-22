@@ -2,8 +2,8 @@ import { WorkerIdentify } from './worker_define';
 import { WorkerTransmit, RegisterPack, WorkerMetaInfo } from './worker_ds';
 import { HasReturn, HasTransmit } from './worker_desc';
 import { getPort, addWorkerPort, addWorkerMeta } from './worker_mgr';
-import { getWorkerInfo } from './worker_desc';
-
+import { getWorkerInfo, LOCAL_INJECT_QUEUE } from './worker_desc';
+ 
 /**
  * 默认动作触发器
  */
@@ -27,9 +27,39 @@ export class BasicPatch {
     }
   }
 
+  /**
+   * 接受来自其他线程的注册信息
+   * @param transmit
+   */
   @HasReturn(false)
   @HasTransmit()
-  async add_meta(transmit: WorkerTransmit<WorkerMetaInfo>) {
+  async addMeta(transmit: WorkerTransmit<WorkerMetaInfo>) {
     addWorkerMeta(transmit);
+  }
+
+  /**
+   * 线程激活前回调
+   * 在`executeActivate`函数执行前执行
+   */
+  @HasReturn(true)
+  async beforeActivate() {
+    console.log(`激活前`)
+    return await new Promise<void>((resolve)=>{
+      setTimeout(()=>{
+        for(const callback of LOCAL_INJECT_QUEUE){
+          callback()
+        }
+        resolve()
+      },3000)
+    })
+  }
+
+  /**
+   * 业务线程启动函数，激活周期
+   */
+  @HasReturn(false)
+  async executeActivate() {
+    notNil(process.instance);
+    process.instance.activate();
   }
 }

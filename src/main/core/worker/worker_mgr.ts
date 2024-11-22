@@ -195,3 +195,21 @@ export function addWorkerMeta(info: WorkerTransmit<WorkerMetaInfo>) {
   const port = getPort(info.srcIdentify);
   WorkerTargetMateMapper.set(port, info.payload);
 }
+
+/**
+ * 判断对应线程是否已注册至本地
+ * @param identify
+ * @returns
+ */
+export function isRegistered(identify: WorkerIdentify | string) {
+  const port = getPort(identify);
+  const info = WorkerTargetMateMapper.get(port);
+  return !!info;
+}
+
+export function unRegister(identify: WorkerIdentify | string) {
+  const port = getPort(identify);
+  WorkerTargetMateMapper.delete(port);
+  WorkerInstanceMapper.delete(identify);
+  WorkerPortMapper.delete(identify);
+}
