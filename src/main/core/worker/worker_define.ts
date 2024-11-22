@@ -3,5 +3,6 @@ export enum WorkerIdentify {
 }
 
 export enum BasicAction {
-    REGISTER = 'register'
+    REGISTER = 'register',
+    ADD_META = 'add_meta'
 }

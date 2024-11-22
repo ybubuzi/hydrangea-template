@@ -1,7 +1,7 @@
 import { WorkerIdentify } from './worker_define';
-import { WorkerTransmit, RegisterPack } from './worker_ds';
+import { WorkerTransmit, RegisterPack, WorkerMetaInfo } from './worker_ds';
 import { HasReturn, HasTransmit } from './worker_desc';
-import { getPort, addWorkerPort } from './worker_mgr';
+import { getPort, addWorkerPort, addWorkerMeta } from './worker_mgr';
 import { getWorkerInfo } from './worker_desc';
 
 /**
@@ -25,5 +25,11 @@ export class BasicPatch {
       addWorkerPort(transmit.srcIdentify as any, transmit.payload.port);
       transmit.payload.port.postMessage(result);
     }
+  }
+
+  @HasReturn(false)
+  @HasTransmit()
+  async add_meta(transmit: WorkerTransmit<WorkerMetaInfo>) {
+    addWorkerMeta(transmit);
   }
 }

@@ -19,7 +19,7 @@ const WorkerReqquestMapper = new Map<string, PromisePair>();
 /** 记录线程注册信息 */
 const WorkerTargetMateMapper = new WeakMap<MessagePort, WorkerMetaInfo>();
 /** 记录本地已建立的线程对象，避免多次创建 */
-const WorkerInstanceMapper = new   Map<WorkerIdentify | string, Object>();
+const WorkerInstanceMapper = new Map<WorkerIdentify | string, Object>();
 /* =========================== END 内部变量区 =================================== */
 
 /**
@@ -161,9 +161,9 @@ async function createWorkerLink(identify: WorkerIdentify): Promise<MessagePort> 
  * @param identify
  */
 export async function getWorkerInstance(identify: WorkerIdentify | string) {
-  const existing = WorkerInstanceMapper.get(identify)
-  if(existing){
-    return existing
+  const existing = WorkerInstanceMapper.get(identify);
+  if (existing) {
+    return existing;
   }
   const workerPort = await createWorkerLink(identify as WorkerIdentify);
   const proxy = new Proxy(
@@ -188,4 +188,10 @@ export async function getWorkerInstance(identify: WorkerIdentify | string) {
   ) as any;
   WorkerInstanceMapper.set(identify, proxy);
   return proxy;
+}
+
+export function addWorkerMeta(info: WorkerTransmit<WorkerMetaInfo>) {
+  notNil(info.payload, 'Worker meta info is not set');
+  const port = getPort(info.srcIdentify);
+  WorkerTargetMateMapper.set(port, info.payload);
 }

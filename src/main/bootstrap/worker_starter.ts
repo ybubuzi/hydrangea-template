@@ -5,7 +5,7 @@ import { Worker, MessageChannel, MessagePort } from 'worker_threads';
 import { WorkerContext, WorkerTransmit } from '@/main/core/worker/worker_ds';
 import { addWorkerPort } from '@/main/core/worker/worker_mgr';
 import { BasicPatch } from '@/main/core/worker/worker_patch';
-
+import { getWorkerInstance } from '@/main/core/worker/worker_mgr';
 interface ModuleLike {
   default: string;
 }
@@ -43,7 +43,7 @@ function addGlobalListener(name: string, worker: Worker) {
  * 注册主进程与进程之间的信道
  */
 export default function () {
-  const patch = new BasicPatch()
+  const patch = new BasicPatch();
   const modules = import.meta.glob('@/main/worker/**/index.ts', {
     eager: true,
     query: '?modulePath'

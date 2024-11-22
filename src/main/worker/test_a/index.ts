@@ -6,8 +6,8 @@ import { Thread, InjectWorker } from '@/main/core/worker/worker_desc';
 @Thread()
 export class TestAWroker extends WorkerBasicWrapper {
   
-  @InjectWorker('worker-2')
-  private boo;
+  // @InjectWorker('worker-2')
+  // private boo;
 
   constructor() {
     super();
@@ -19,10 +19,10 @@ export class TestAWroker extends WorkerBasicWrapper {
     console.log(`[${process.identity}][look]:`, `I've been called`);
   }
   lazyRun() {
-    setTimeout(async () => {
-      const msg = await this.boo.sayHi(process.identity);
-      console.log(`[${process.identity}][lazyRun]:`, `I received your message "${msg}"`);
-    }, 1000);
+    // setTimeout(async () => {
+    //   const msg = await this.boo.sayHi(process.identity);
+    //   console.log(`[${process.identity}][lazyRun]:`, `I received your message "${msg}"`);
+    // }, 1000);
   }
 }
 

@@ -2,8 +2,9 @@
  * 用于提供标记线程信息相关的工具库
  */
 import { WorkerTransmit, ActionMeta } from './worker_ds';
-import { addTiggerAction, getWorkerInstance } from './worker_mgr';
+import { addTiggerAction, getWorkerInstance, getPort } from './worker_mgr';
 import { isMainThread } from 'worker_threads';
+import { WorkerIdentify, BasicAction } from './worker_define';
 
 type ClassConstructor<T = any> = new (...args: any[]) => T;
 
@@ -190,6 +191,11 @@ export function Thread() {
             },
             {}
           );
+        }
+        const info = getWorkerInfo();
+        const transmit = new WorkerTransmit(WorkerIdentify.MAIN_THREAD_IDENTIFY, BasicAction.ADD_META, info);
+        if (process.identity != WorkerIdentify.MAIN_THREAD_IDENTIFY) {
+          getPort(WorkerIdentify.MAIN_THREAD_IDENTIFY).postMessage(transmit);
         }
       }
 
