@@ -44,7 +44,7 @@ const WORKER_INSTANCE_MAPPER = new Map<ClassConstructor, Object>();
 const LOCAL_DEPENDENCY_INJECT = new Map<ClassConstructor, Array<DepMeta>>();
 
 /** 记录本地所有需要依赖注入的类注册方法，将在线程激活前调用 */
-export const LOCAL_INJECT_QUEUE = new Array<Function>()
+export const LOCAL_INJECT_QUEUE = new Array<Function>();
 
 /**
  * 新增或更新暴露函数的信息
@@ -172,7 +172,7 @@ export function Thread() {
         }
         // todo: 可选择检测WORKER_INSTANCE_MAPPER是否存在映射来限制类创建单例
         Promise.resolve(this._register());
-        LOCAL_INJECT_QUEUE.push(this._inject.bind(this))
+        LOCAL_INJECT_QUEUE.push(this._inject.bind(this));
       }
       /** 获取当前类实例所有函数并注册 */
       private _register() {
@@ -202,21 +202,19 @@ export function Thread() {
         }
       }
 
-      private _inject() {
-        setTimeout(async () => {
-          const dependList = LOCAL_DEPENDENCY_INJECT.get(Module);
-          if (!dependList) {
-            return;
-          }
-          const instance = WORKER_INSTANCE_MAPPER.get(Module);
-          if (!instance) {
-            throw new HydrangeaError(ErrorCode.BAD_CALL_FUNCTION, 'Instance not found');
-          }
-          for (const depend of dependList) {
-            const worker = await getWorkerInstance(depend.dependName);
-            Reflect.set(this, depend.memberName, worker);
-          }
-        }, 300);
+      private async _inject() {
+        const dependList = LOCAL_DEPENDENCY_INJECT.get(Module);
+        if (!dependList) {
+          return;
+        }
+        const instance = WORKER_INSTANCE_MAPPER.get(Module);
+        if (!instance) {
+          throw new HydrangeaError(ErrorCode.BAD_CALL_FUNCTION, 'Instance not found');
+        }
+        for (const depend of dependList) {
+          const worker = await getWorkerInstance(depend.dependName);
+          Reflect.set(this, depend.memberName, worker);
+        }
       }
     };
     return SubClass as T;

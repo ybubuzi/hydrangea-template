@@ -3,7 +3,7 @@ import { WorkerTransmit, RegisterPack, WorkerMetaInfo } from './worker_ds';
 import { HasReturn, HasTransmit } from './worker_desc';
 import { getPort, addWorkerPort, addWorkerMeta } from './worker_mgr';
 import { getWorkerInfo, LOCAL_INJECT_QUEUE } from './worker_desc';
- 
+
 /**
  * 默认动作触发器
  */
@@ -43,15 +43,15 @@ export class BasicPatch {
    */
   @HasReturn(true)
   async beforeActivate() {
-    console.log(`激活前`)
-    return await new Promise<void>((resolve)=>{
-      setTimeout(()=>{
-        for(const callback of LOCAL_INJECT_QUEUE){
-          callback()
+    console.log(`激活前`);
+    return await new Promise<void>((resolve) => {
+      setTimeout(async () => {
+        for (const callback of LOCAL_INJECT_QUEUE) {
+          await callback();
         }
-        resolve()
-      },3000)
-    })
+        resolve();
+      }, 3000);
+    });
   }
 
   /**
