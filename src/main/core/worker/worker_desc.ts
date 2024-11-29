@@ -162,6 +162,11 @@ export function FunctionDesc(desc: string) {
 export function Thread() {
   return function <T extends ClassConstructor>(Module: T) {
     const SubClass = class extends Module {
+      
+      static get name(){
+        return Module.name
+      }
+
       constructor(...args: any[]) {
         super(...args); // 调用原始构造器
         // @ts-ignore

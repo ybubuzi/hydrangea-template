@@ -9,3 +9,4 @@ out
 build-dev
 package-lock.json
 out
+electron.vite.config.[0-9]*.mjs
